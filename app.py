@@ -39,12 +39,15 @@ if "modo_tela" not in st.session_state:
 
 st.markdown("""
 <style>
+    .stApp {
+        background-color: #0e1117;
+    }
     div[data-testid="stForm"] {
         background-color: #1e1e24;
         border-radius: 15px;
         padding: 30px;
         border: none;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
     input {
         border-radius: 8px !important;
@@ -84,6 +87,9 @@ st.markdown("""
     .stButton > button:hover {
         color: white;
         background-color: #2b2b36;
+    }
+    p, h1, h2, h3, h4, h5, h6, span, label {
+        color: #e0e0e0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -127,7 +133,7 @@ if not st.session_state.logado:
                         st.warning("Preencha todos os campos.")
             
             if st.button("Esqueceu a Senha ou Usuário?"):
-                st.warning("Função de recuperação pendente. Fale com o Admin!")
+                st.error("Lembrete: você precisa me dizer o que essa função faz.")
                 
             if st.button("Criar uma Nova Conta"):
                 st.session_state.modo_tela = "cadastro"
@@ -162,8 +168,43 @@ if not st.session_state.logado:
                 st.rerun()
 
 else:
-    st.write(f"Logado como: {st.session_state.username}")
-    if st.button("Sair"):
-        st.session_state.logado = False
-        st.session_state.is_admin = False
-        st.rerun()
+    col_user, col_clock, col_logout = st.columns([2, 2, 1])
+    with col_user:
+        st.write(f" Usuário: **{st.session_state.username}** {'(ADMIN)' if st.session_state.is_admin else ''}")
+    with col_clock:
+        hora_mestre = obter_horario_servidor().strftime("%d/%m/%Y %H:%M:%S")
+        st.write(f" Relógio Mestre: `{hora_mestre}`")
+    with col_logout:
+        if st.button("Sair / Logoff"):
+            st.session_state.logado = False
+            st.session_state.is_admin = False
+            st.rerun()
+
+    st.markdown("---")
+    
+    if st.session_state.is_admin:
+        menu = ["Jogos", "Mural", "Ranking", "Perfil", "Painel Admin"]
+    else:
+        menu = ["Jogos", "Mural", "Ranking", "Perfil"]
+        
+    aba_atual = st.sidebar.radio("Navegação", menu)
+    
+    if aba_atual == "Jogos":
+        st.title(" Mural de Jogos & Apostas")
+        st.write("Aba pronta para receber a listagem das partidas da Copa.")
+        
+    elif aba_atual == "Mural":
+        st.title(" Mural da Comunidade")
+        st.write("Feed de posts com mídia e reações virá aqui.")
+        
+    elif aba_atual == "Ranking":
+        st.title(" Classificação Geral")
+        st.write("Liderança em tempo real.")
+        
+    elif aba_atual == "Perfil":
+        st.title(" Meu Perfil")
+        st.write("Estatísticas individuais e seleção campeã.")
+        
+    elif aba_atual == "Painel Admin" and st.session_state.is_admin:
+        st.title(" Painel de Controle")
+        st.write("Área para você gerenciar apostas e manutenção.")
